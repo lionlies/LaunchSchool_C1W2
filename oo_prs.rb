@@ -1,25 +1,16 @@
-# noun: player, hands
-# verb: player pick hand, computer pick hand,
-#       compare hands, show winning message,
-
-# refactor:
-# 1. Show full word of hand instead of abbr.
-#    e.g. Bob picks paper, computer picks rock.
-# 2. Change Player class to PlayerHand class.
-
 class Hand
   include Comparable
 
   attr_reader :value
 
-  def initialize(v)
-    @value = v
+  def initialize(value)
+    @value = value
   end
 
   def <=>(another_hand)
     if @value == another_hand.value
       0
-    elsif (@value == "p" && another_hand.value == "r") || (@value == "r" && another_hand.value == "s") || (@value == "s" && another_hand.value == "p")
+    elsif (@value == 'p' && another_hand.value == 'r') || (@value == 'r' && another_hand.value == 's') || (@value == 's' && another_hand.value == 'p')
       1
     else
       -1
@@ -37,26 +28,38 @@ class Hand
     end
   end
 
+  def show_hand_full_name
+    case @value
+    when "r"
+      "rock"
+    when "s"
+      "scissors"
+    when "p"
+      "paper"
+    end
+
+  end
+
 end
 
 
 class Player
-  attr_accessor :hand
   attr_reader :name
+  attr_accessor :hand
 
-  def initialize(n)
-    @name = n
+  def initialize(name)
+    @name = name
   end
 
   def to_s
-    "#{name} currently has a choice of #{self.hand.value}!"
+    "#{self.name} has a choice of #{self.hand.show_hand_full_name}."
   end
 end
 
 class Human < Player
   def pick_hand
     begin
-      puts "Pick one: (p/r/s)"
+      puts "Pick one: (p, r, s)"
       c = gets.chomp.downcase
     end until Game::CHOICES.keys.include?(c)
 
@@ -70,23 +73,36 @@ class Computer < Player
   end
 end
 
-
 class Game
-  CHOICES = {"p"=>"paper", "r"=>"rock", "s"=>"scissors"}
   attr_reader :player, :computer
 
+  CHOICES = {'p' => 'paper', 'r' => 'rock', 's' => 'scissors'}
+
   def initialize
-    @player = Human.new("Bob")
-    @computer = Computer.new("R2D2")
+    @player = Human.new("Jason")
+    @computer = Computer.new("C3PO")
   end
+
 
   def compare_hands
     if player.hand == computer.hand
-      puts "It's a tie."
+      puts "It's a tie!"
     elsif player.hand > computer.hand
+      player.hand.display_winning_message
       puts "#{player.name} won!"
     else
+      computer.hand.display_winning_message
       puts "#{computer.name} won!"
+    end
+  end
+
+  def play_again?
+    puts "Would you like to play again?"
+    play_again = gets.chomp.downcase
+    if play_again == "y"
+      Game.new.play
+    else
+      puts "Bye."
     end
   end
 
@@ -96,7 +112,9 @@ class Game
     puts player
     puts computer
     compare_hands
+    play_again?
   end
+
 end
 
 game = Game.new.play
